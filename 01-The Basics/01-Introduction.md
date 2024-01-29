@@ -181,5 +181,160 @@ You use interpolation to include the values for name, city and state of the hous
 
 ### `*ngFor`
 
+Add the `CommonModule` to the host component.
 
-https://angular.dev/tutorials/first-app/ngFor
+```typescript
+import {CommonModule} from '@angular/common';
+...
+@Component({
+    selector: 'app-home',
+    standalone: true,
+    imports: [CommonModule, HousingLocationComponent],
+    templateUrl: './home.component.html',
+    styleUrl: './home.component.css'
+})
+```
+
+```typescript
+<section class="results">
+    <app-housing-location
+        *ngFor="let housingLocation of housingLocationList"
+        [housingLocation]="housingLocation"
+      ></app-housing-location>
+</section>
+```
+
+## Angular services
+
+Angular services provide a way for you to separate Angular app data and functions that can be used by multiple components in your app. 
+To be used by multiple components, a service must be made **injectable**. 
+Services that are injectable and used by a component **become dependencies of that component**. 
+The component depends on those services and can't function without them.
+
+### Dependency injection
+
+https://angular.dev/guide/di
+Dependency injection is the mechanism that manages the dependencies of an app's components and the services that other components can use.
+
+### Service creation
+
+```bash
+ng generate service housing --skip-tests
+```
+The command will generate an `HousingService` class in the project, where we can pass the static
+list of houses originally in the `HomeCompoment` and then add the methods
+
+```typescript
+getAllHousingLocations(): HousingLocation[] {
+    return this.housingLocationList;
+  }
+  getHousingLocationById(id: number): HousingLocation | undefined {
+    return this.housingLocationList.find((housingLocation) => housingLocation.id === id);
+  }
+```
+
+### Service injection
+
+In the `HomeComponent`
+
+```typescript
+import {HousingService} from '../housing.service';
+```
+```typescript
+export class HomeComponent {
+
+    housingLocationList: HousingLocation[] = [];
+
+    constructor(private housingService: HousingService) {
+        this.housingLocationList = this.housingService.getAllHousingLocations();
+    }
+
+}
+
+```
+
+## Routing 
+https://angular.dev/tutorials/first-app/routing
+
+Routing is the ability to navigate from one component in the application to another. 
+In _Single Page Applications_ (**SPA**), only parts of the page are updated to represent the requested view for the user.
+
+The [Angular Router](https://angular.dev/guide/routing) enables users to declare routes and specify which component 
+should be displayed on the screen if that route is requested by the application.
+
+### Adding routes
+
+In the `src/app` directory, create a file called `routes.ts`. 
+This file is where we will define the routes in the application.
+
+In `main.ts`, make the following updates to enable routing in the application:
+
+```typescript
+import {provideRouter} from '@angular/router';
+import routeConfig from './app/routes';
+```
+
+Update the call to `bootstrapApplication` to include the routing configuration:
+
+```typescript
+bootstrapApplication(AppComponent, {
+  providers: [provideProtractorTestingSupport(), provideRouter(routeConfig)],
+}).catch((err) => console.error(err));
+```
+
+In `src/app/app.component.ts`, update the component to use routing
+
+```typescript
+import {RouterModule} from '@angular/router';
+
+...
+@Component({
+    imports: [HomeComponent, RouterModule],
+    template: `
+          <main>
+          <a [routerLink]="['/']">
+            <header class="brand-name">
+              <img class="brand-logo" src="/assets/logo.svg" alt="logo" aria-hidden="true" />
+            </header>
+          </a>
+          <section class="content">
+            <router-outlet></router-outlet>
+          </section>
+        </main>
+    `,
+    
+})
+
+```
+
+The `<router-outlet>` tag is the container for the rendered component linked to the route
+
+### Add routes
+
+In the `routes.ts` file
+
+```typescript
+import {Routes} from '@angular/router';
+import {HomeComponent} from './home/home.component';
+import {DetailsComponent} from './details/details.component';
+
+const routeConfig: Routes = [
+    {
+        path: '',
+        component: HomeComponent,
+        title: 'Home page',
+    },
+    {
+        path: 'details/:id',
+        component: DetailsComponent,
+        title: 'Home details',
+    },
+];
+export default routeConfig;
+```
+
+That is what we import in the `main.ts` file
+
+### Get route parameters in a component
+
+https://angular.dev/tutorials/first-app/details-page
