@@ -309,7 +309,7 @@ import {RouterModule} from '@angular/router';
 
 The `<router-outlet>` tag is the container for the rendered component linked to the route
 
-### Add routes
+### Add specific routes
 
 In the `routes.ts` file
 
@@ -335,6 +335,107 @@ export default routeConfig;
 
 That is what we import in the `main.ts` file
 
-### Get route parameters in a component
+### Routing with route parameters
 
-https://angular.dev/tutorials/first-app/details-page
+Route parameters enable you to include dynamic information as a part of your route URL. 
+To identify which housing location a user has clicked on you will use the id property of the HousingLocation type.
+
+We can add a `routerLink` to the `HousingLocationComponent` in order to create the link from the list to the specific house
+
+We first add the imports:
+
+```typescript
+import {RouterModule} from '@angular/router';
+...
+import {RouterModule} from '@angular/router';
+
+@Component({
+    ...
+    imports: [RouterModule],
+    ...
+})
+export class HousingLocationComponent {
+    ...
+}
+```
+Then we can add the link to the template
+
+```angular2html
+<a [routerLink]="['/details', housingLocation.id]">Learn More</a>
+```
+
+### Get the route parameter
+
+We now need to get the `id` parameter from the route to show the details of the specific house.
+
+```typescript
+import {ActivatedRoute} from '@angular/router';
+
+export class DetailsComponent {
+  housingLocationId = -1;
+  constructor(private route: ActivatedRoute) {
+      this.housingLocationId = Number(this.route.snapshot.params['id']);
+  }
+}
+```
+
+## Forms
+
+### What approaches to choose
+
+| Forms                 | Details                                                                                                                                                                                                                                                                                                                                                                                                             |
+|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **Reactive forms**    | Provide direct, explicit access to the underlying form's object model. Compared to template-driven forms, they are more robust: they're more scalable, reusable, and testable. If forms are a key part of your application, or you're already using reactive patterns for building your application, use reactive forms.                                                                                            |
+| **Template-driven forms** | Rely on directives in the template to create and manipulate the underlying object model. They are useful for adding a simple form to an app, such as an email list signup form. They're straightforward to add to an app, but they don't scale as well as reactive forms. If you have very basic form requirements and logic that can be managed solely in the template, template-driven forms could be a good fit. |
+
+We will use **Reactive forms**
+
+### Add form imports 
+
+To the `DetailsComponent` 
+
+```typescript
+import {FormControl, FormGroup, ReactiveFormsModule} from '@angular/forms';
+...
+imports: [ ReactiveFormsModule]
+...
+export class DetailsComponent {
+    
+    applyForm = new FormGroup({
+        firstName: new FormControl(''),
+        lastName: new FormControl(''),
+        email: new FormControl(''),
+    });
+    ...
+    submitApplication() {
+        this.housingService.submitApplication(
+            this.applyForm.value.firstName ?? '',
+            this.applyForm.value.lastName ?? '',
+            this.applyForm.value.email ?? '',
+        );
+    }
+}
+```
+
+In Angular, `FormGroup` and `FormControl` are types that enable you to build forms. 
+The `FormControl` type can provide a default value and shape the form data. 
+In this example firstName is a string and the default value is empty string.
+
+and the form temlpate
+
+```angular2html
+
+<form [formGroup]="applyForm" (submit)="submitApplication()">
+    <label for="first-name">First Name</label>
+    <input id="first-name" type="text" formControlName="firstName"/>
+    <label for="last-name">Last Name</label>
+    <input id="last-name" type="text" formControlName="lastName"/>
+    <label for="email">Email</label>
+    <input id="email" type="email" formControlName="email"/>
+    <button type="submit" class="primary">Apply now</button>
+</form>
+```
+
+
+https://angular.dev/tutorials/first-app/search
+
