@@ -436,6 +436,14 @@ and the form temlpate
 </form>
 ```
 
+In this version, the ``HousingService::submitApplication`` method would just log on console the submitted data.
+
+## Add search functionalities
+
+In the `HomeComponent` we create an array to store house locations to be filtered.
+
+
+
 
 https://angular.dev/tutorials/first-app/search
 
