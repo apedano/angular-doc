@@ -436,6 +436,70 @@ and the form temlpate
 </form>
 ```
 
+## Search functionality
+
+The app will enable users to search through the data provided by your app and display only the results that match the entered term.
+
+We change the `HomeComponent` to add a searching functionality.
+
+## HTTP service call
+
+Up until this point your app has read data from a static array in an Angular service. 
+The next step is to use a JSON server that your app will communicate with over HTTP. 
+The HTTP request will simulate the experience of working with data from a server.
+
+### JSON server configuration
+
+```bash
+npm install -g json-server
+```
+
+In the root directory of your project, create a file called `db.json` and copy the json list of 
+housing location from the `HousingService`.
+This is where you will store the data for the json-server.
+
+To test the server
+
+```bash
+json-server --watch db.json
+```
+
+It should expose the file content on `http://localhost:3000/locations`
+
+### Service call implementation
+
+```typescript
+async getAllHousingLocations(): Promise<HousingLocation[]> {
+    const data = await fetch(this.externalServiceUrl);
+    return (await data.json()) ?? [];
+  }
+
+  async getHousingLocationById(id: number): Promise<HousingLocation | undefined> {
+    const data = await fetch(`${this.externalServiceUrl}/${id}`);
+    return (await data.json()) ?? {};
+  }
+```
+
+### Usage of the service methods
+
+The methods return a `Promise<?>` therefore the caller must define the callback when the promise returns
+
+```typescript
+ this.housingService.getAllHousingLocations().then((housingLocationList: HousingLocation[]) => {
+      this.housingLocationList = housingLocationList;
+      this.filteredLocationList = housingLocationList;
+    });
+// Here we cannot define the loadedHousingLocation type because it can be HousingLocation | undefined
+this.housingService.getHousingLocationById(this.housingLocationId)
+    .then((loadedHousingLocation) => {this.housingLocation = loadedHousingLocation});
+```
+
+
+
+https://angular.io/tutorial/tour-of-heroes/toh-pt6
+https://medium.com/front-end-weekly/handling-http-request-using-rxjs-in-angular-25060a70c6d9
+https://timdeschryver.dev/blog/the-benefits-of-adding-rx-query-to-your-angular-project#update-methods
 
 https://angular.dev/tutorials/first-app/search
-
+https://blog.angular-university.io/how-to-build-angular2-apps-using-rxjs-observable-data-services-pitfalls-to-avoid/
+https://github.com/apedano/angular-f1-app/blob/main/src/app/shared/generic.service.ts
