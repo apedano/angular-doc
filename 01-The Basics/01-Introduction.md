@@ -436,6 +436,14 @@ and the form temlpate
 </form>
 ```
 
+## Template driven forms:
+
+
+
+
+https://material.angular.io/components/categories
+
+
 ## Search functionality
 
 The app will enable users to search through the data provided by your app and display only the results that match the entered term.
@@ -493,6 +501,9 @@ The methods return a `Promise<?>` therefore the caller must define the callback 
 this.housingService.getHousingLocationById(this.housingLocationId)
     .then((loadedHousingLocation) => {this.housingLocation = loadedHousingLocation});
 ```
+
+
+
 
 
 

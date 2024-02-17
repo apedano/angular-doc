@@ -120,10 +120,10 @@ pedano_alessandro@cloudshell:~ (recipes-ffddb)$ cat cors.json
     "maxAgeSeconds": 3600
   }
 ]
-pedano_alessandro@cloudshell:~ (recipes-ffddb)$ gsutil cors set cors.json gs://recipes-ffddb.appspot.com/
+$ gsutil cors set cors.json gs://recipes-ffddb.appspot.com/
 Setting CORS on gs://recipes-ffddb.appspot.com/...
 ```
-**NOTE**: the <BUCKET NAME> used in the command is the same from ``firebaseConfig.storageBucket``
+**NOTE**: the **BUCKET NAME** used in the command is the same from ``firebaseConfig.storageBucket``
 
 
 https://scientyficworld.org/how-to-connect-firebase-with-angular-project/
