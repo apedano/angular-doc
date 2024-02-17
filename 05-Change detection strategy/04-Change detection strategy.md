@@ -12,12 +12,21 @@ You can address this by configuring **change detection to only run on a subset o
 If you are **confident that a part of the application is not affected by a state change**, you can use `OnPush` 
 to skip change detection in an entire component subtree.
 
+## The default strategies
+
+Angular relyses on zone.js which detects a change in the document tree (either an input binding
+or an event handling), but **it doesn't identify where it happens** in the tree.
+
+Therefore, the default strategy is to run change detection **from top to bottom for all components in the tree**, as seen below.
+
+![default_strategy.png](img%2Fdefault_strategy.png)
+
 ## Using `OnPush`
 
 `OnPush` change detection instructs Angular to run change detection for a **component subtree** `only` when:
 
-* The **root component of the subtree receives new inputs** as the result of a template binding. Angular compares the current and past value of the input with ==.
-* Angular **handles an event** (for example using event binding, output binding, or @HostListener ) **in the subtree's root component or any of its children** whether they are using `OnPush` change detection or not.
+1. The **root component of the subtree receives new inputs** as the result of a template binding. Angular compares the current and past value of the input with ==.
+1. Angular **handles an event** (for example using event binding, output binding, or @HostListener ) **in the subtree's root component or any of its children** whether they are using `OnPush` change detection or not.
 
 ```typescript
 import { ChangeDetectionStrategy, Component } from '@angular/core';
@@ -27,55 +36,76 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 export class MyComponent {}
 ```
 
+
 ## Common change detection scenarios
 
-### Event handled by component with default change detection
+### Legenda
 
-If Angular handles an event within a component **without `OnPush` strategy**, the framework executes change detection on the entire component tree. 
-Angular will **skip descendant component subtrees with roots using `OnPush`, which have not received new inputs**.
+![legenda_01.png](img%2Flegenda_01.png)
+Component tree node using the Default strategy (left) and the OnPush strategy (right)
 
-As an example, if we set the change detection strategy of `MainComponent` to `OnPush` and the user 
-interacts with a component outside the subtree with root MainComponent, Angular will check all the green components 
-from the diagram below (`AppComponent`, `HeaderComponent`, `SearchComponent`, `ButtonComponent`) unless `MainComponent` receives new inputs:
+![legenda_02.png](img%2Flegenda_02.png)
 
-![default_change_detection.png](img%2Fdefault_change_detection.png)
+Component tree node dispatching an event (left), running change detection (middle), receiving an input (right)
 
-### An event is handled by a component with OnPush
+### onPush receives a new input
 
-If Angular handles an event **within a component with OnPush strategy**, the framework will execute change detection **within the entire component tree, 
-ignoring component subtrees with roots using `OnPush`**, which have not received new inputs and are outside the component which handled the event.
+With an input binding value change,  
 
-As an example, if Angular handles an event within `MainComponent`, the framework will run **change detection in the entire component tree**. 
-Angular will **ignore the subtree with root `LoginComponent` because it has OnPush and the event happened outside of`] its scope**.
+![scnario_1.png](img%2Fscnario_1.png)
 
-![event_onpush.png](img%2Fevent_onpush.png)
+Change detection will run on all components except E, because:
 
-### An event is handled by a descendant of a component with OnPush
+* A, B, and D use the Default strategy
 
-As an example, in the diagram below, Angular handles an event in `LoginComponent` which uses `OnPush`. 
-Angular will invoke change detection in the entire component subtree including `MainComponent` (`LoginComponent`’s parent), 
-even though `MainComponent` has `OnPush` as well. Angular checks `MainComponent` as well because `LoginComponent` is part of its view.
+* C uses `OnPush`, but the rule (1) applies (it received a new input)
 
-![event_ancestor_onpush.png](img%2Fevent_ancestor_onpush.png)
+* E uses `OnPush`, but it didn’t receive any new inputs, hence it’s not checked
 
-### New inputs to component with OnPush
+* F is part of the subtree with C as its root and uses the Default strategy, hence it is checked
 
-Angular will run change detection within a child component with `OnPush` when **setting an input property as result of a template binding**.
+### Event on an `onPush`
 
-For example, in the diagram below, `AppComponent` passes a new input to `MainComponent`, which has `OnPush`. 
-Angular will run change detection in `MainComponent` but will not run change detection in `LoginComponent`, which also has `OnPush`, unless it receives new inputs as well.
+![scnario_2.png](img%2Fscnario_2.png)
 
-![new_input.png](img%2Fnew_input.png)
+Change detection will run on **all components except E**, because:
 
-https://www.tiny.cloud/blog/angular-change-detection-onpush-strategy/
-https://angulargems.beehiiv.com/p/angular-on-push-change-detection-strategy
+* A, B, and D use the Default strategy
 
+* C uses OnPush, but rule (2) applies (the event is in its scope as root)
+
+* E uses OnPush, but the event is out of its scope, hence it’s not checked
+
+* F is part of the subtree with C as its root and uses the Default strategy, hence it is checked
+
+### Event on child of `onPush`
+
+![scnario_3.png](img%2Fscnario_3.png)
+
+Change detection will run on all components, because:
+
+* A, C, E, and F use the Default strategy
+
+* B uses the `OnPush` strategy, but the event happened on D which is its child, hence rule (2) applies
+
+* D uses the `OnPush` strategy, but the rule (2) applies (the event is in its scope)
+
+
+### Event on a default strategy component
+
+![scnario_4.png](img%2Fscnario_4.png)
+
+Change detection will run only on A, B, and D, because:
+
+* A, B, and D use the Default strategy
+
+C uses `OnPush` and none of the rules holds (event outside its scope), hence the entire subtree is skipped
 
 ## Summary 
 
 Keep in mind of following details of OnPush change detection, will make your app working transparently as default, but more efficient!
 
-1. With Onpush, Angular only compare change of variable by reference. and only @Input changed and passed from parent, will auto trigger change detection.
+1. With `Onpush`, Angular only compare change of variable by reference. and only `@Input` changed and passed from parent, will auto trigger change detection.
 
 2. Any event binding using `(foo)=”bar()”` or `@HostListener()` will trigger change detection automatically
 
