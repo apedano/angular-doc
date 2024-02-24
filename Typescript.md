@@ -78,18 +78,18 @@ let something: number | string | boolean;
 It can be used to assign a **default value to a variable if it is _null_ or _undefined_**
 
 ```typescript
+const firstName = null;
+const lastName = undefined;
+const fullName = firstName ?? lastName ?? 'John Doe';
+console.log(fullName); // Output: "John Doe"
+```
+
+```typescript
 
 null || undefined ?? "foo"; // raises a SyntaxError
 true && undefined ?? "foo"; // raises a SyntaxError
 
 (null || undefined) ?? "foo"; // returns "foo"
-```
-
-```typescript
-const firstName = null;
-const lastName = undefined;
-const fullName = firstName ?? lastName ?? 'John Doe';
-console.log(fullName); // Output: "John Doe"
 ```
 
 ### Nullish coalescing assignment
@@ -107,6 +107,14 @@ x ??= 2; //does not throw an error, despite x being const
 
 ```typescript
 housingLocation!: HousingLocation;
+```
+
+### Elvis operatori
+
+Call the property on the right of `?` if the property on the left of `?` is not `null`
+
+```typescript
+f.form.controls.email?.valid
 ```
 
 
