@@ -83,3 +83,13 @@ ou can also create custom validators by creating a function that returns a Valid
 <pre> Touched ? {{unitForm.form.controls.name?.touched}} </pre>
 ```
 
+```angular2html
+<input type="number" matInput [(ngModel)]="unit.conversionRatio" name="conversion"
+  placeholder="Inserisci un numero" pattern="^[0-9]+(,[0-9]+)?$">
+<mat-hint>Separatore: ,</mat-hint>
+@if (unitForm.form.controls['conversion'].hasError('pattern') ||
+unitForm.form.controls['conversion'].hasError('number')) {
+<mat-error>Il fattore di conversione deve essere un <strong>numero</strong></mat-error>
+}
+```
+
