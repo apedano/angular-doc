@@ -28,7 +28,7 @@ It's a reference variable built in the template
 <form (ngSubmit)="onSubmit(unitForm)" #unitForm="ngForm">
     ...
 
-    <input matInput placeholder="es. L" [(ngModel)]="unit.name" name="unitName"> <!-- FormControl -->
+    <input matInput placeholder="es. L" [(ngModel)]="unit.name" name="unitName"> <!-- FormControl -->[01A-Template driven form.md](01A-Template%20driven%20form.md)
 
     <button type="submit" class="btn btn-success" [disabled]="!unitForm.form.valid">Submit</button>
     ...
@@ -170,46 +170,29 @@ These are very similar to their synchronous counterparts, with the following dif
 ### Implement the AsyncValidator
 
 ```typescript
-@Injectable({ providedIn: 'root' })
-export class UnitNameUniqueValidator implements AsyncValidator {
-    
-    constructor(private unitService: UnitService, private appStateService: AppStateService) {}
-  
-    validate(control: AbstractControl<any, any>): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> {
-        const unitName: string = control.value;
-      if(unitName.length == 0) {
-        return of(null);
-      }
-      return this.unitService.getByName(unitName.toUpperCase()).pipe(
-        first(), //this makes the returned observable finite.
-        tap(existingUnit => this.appStateService.logIfDebug("UnitNameUniqueValidatorDirective is check valid", existingUnit == undefined)),
-        map(existingUnit => existingUnit == undefined ? null : { unitNameUnique: true }), 
-        catchError(()=>of(null))
-      );
+export class NameUniqueValidator<T extends NameEntity> implements AsyncValidator {
+
+  constructor(private appStateService: AppStateService, private modelService: GenericNameBasedService<T>, private validateUppercase: boolean) { }
+
+  validate(control: AbstractControl<any, any>): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> {
+    const name: string = control.value;
+    this.appStateService.logIfDebug("Called NameUniqueValidator with", name)
+    if (name.length == 0) {
+      return of(null);
     }
+    let nameToCheck = this.validateUppercase ? name.toUpperCase() : name;
+    return this.modelService.getByName(nameToCheck).pipe(
+            first(), //this makes the returned observable finite.
+            tap(existingUnit => this.appStateService.logIfDebug("NameUniqueValidatorDirective check: ", existingUnit == undefined)),
+            map(existingUnit => existingUnit == undefined ? null : { nameUnique: true }),
+            catchError(() => of(null))
+    );
+  }
 }
 ```
 Where the `unitService.getByName(unitName.toUpperCase())` returns `Observable<Unit>`; we make this finite with 
-the `first()` pipe operator. 
+the `first()` pipe operator.
 
-### Adding async validators to reactive forms
-
-First, the validator has to be injected into the form class.
-
-```typescript
-constructor(private uniqueNameValidator: UnitNameUniqueValidator) { }
-```
-
-Then the validator can be added to the specific control
-
-```typescript
-const unitNameControl = new FormControl('', {
-  asyncValidators: [
-    this.unitNameControl.validate.bind(this.uniqueNameValidator),
-  ],
-  updateOn: 'blur',
-});
-```
 
 ### Adding async validators to template-driven forms
 
@@ -218,30 +201,47 @@ and register the `NG_ASYNC_VALIDATORS` provider on it.
 
 ```typescript
 @Directive({
-  selector: '[unitNameUnique]',
+  selector: '[nameUnique]',
   providers: [
     {
       provide: NG_ASYNC_VALIDATORS,
-      useExisting: forwardRef(() => UnitNameUniqueValidatorDirective),
+      useExisting: forwardRef(() => NameUniqueValidatorDirective),
       multi: true,
     },
   ],
   standalone: true,
 })
-export class UnitNameUniqueValidatorDirective implements AsyncValidator {
+export class NameUniqueValidatorDirective<T extends NameEntity> implements AsyncValidator, OnInit {
 
-  constructor(private uniqueNameValidator: UnitNameUniqueValidator) { }
-  
-  validate(control: AbstractControl<any, any>): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> {
-      return this.uniqueNameValidator.validate(control);
+  @Input()
+  nameUnique!: GenericNameBasedService<T>;
+
+  @Input()
+  validateUppercase!: boolean;
+
+  private uniqueNameValidator!: NameUniqueValidator<T>;
+
+  constructor(private appStateService: AppStateService) { }
+
+  ngOnInit(): void {
+    this.uniqueNameValidator = new NameUniqueValidator(this.appStateService, this.nameUnique, this.validateUppercase);
   }
+
+
+  validate(control: AbstractControl<any, any>): Promise<ValidationErrors | null> | Observable<ValidationErrors | null> {
+    return this.uniqueNameValidator.validate(control);
+  }
+
 }
 ```
 And then add the validator to the control
 
 ```angular2html
-<input matInput placeholder="es. L per 'litri'" appAllCaps [(ngModel)]="unit.name" name="unitName" [ngModelOptions]="{updateOn: 'blur'}" required unitNameUnique>
+<input matInput placeholder="es. L per 'litri'" appAllCaps [(ngModel)]="unit.name" name="unitName" [ngModelOptions]="{updateOn: 'blur'}" required [nameUnique]="unitService" [validateUppercase]="true" >
 ```
+
+Note the two input binding with the validator directive inputs.
+
 
 ### Performance optimization
 

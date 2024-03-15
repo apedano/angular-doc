@@ -109,7 +109,7 @@ x ??= 2; //does not throw an error, despite x being const
 housingLocation!: HousingLocation;
 ```
 
-### Elvis operatori
+### Elvis operator
 
 Call the property on the right of `?` if the property on the left of `?` is not `null`
 
