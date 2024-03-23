@@ -151,6 +151,10 @@ Angular that the assigned value **should be treated as a property from the compo
 
 The value on the right handside is the **name of the property from the `HomeComponent`**.
 
+### Output binding
+
+![input_output_binding.png](images%2Finput_output_binding.png)
+
 ## Interpolation
 
 https://angular.dev/guide/templates/interpolation
@@ -203,6 +207,10 @@ import {CommonModule} from '@angular/common';
       ></app-housing-location>
 </section>
 ```
+
+
+
+
 
 ## Angular services
 

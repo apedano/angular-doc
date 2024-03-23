@@ -29,7 +29,11 @@ It's a reference variable built in the template
     ...
 
     <input matInput placeholder="es. L" [(ngModel)]="unit.name" name="unitName"> <!-- FormControl -->[01A-Template driven form.md](01A-Template%20driven%20form.md)
-
+    <mat-select [(ngModel)]="unit.baseUnit" name="baseUnit">
+      @for (baseUnit of baseUnits; track baseUnit) {
+      <mat-option [value]="baseUnit">{{baseUnit.name}}</mat-option>
+      }
+    </mat-select>
     <button type="submit" class="btn btn-success" [disabled]="!unitForm.form.valid">Submit</button>
     ...
 </form>
@@ -40,7 +44,7 @@ It's a reference variable built in the template
         console.log("form submitted", unitForm, unitForm.form.controls['unitName']);
     }
 
-    @ViewChild('myForm') form: any;  
+    @ViewChild('unitForm') form: NgForm;  
 ```
 
 The form tag defines also the `ngSubmit` function.

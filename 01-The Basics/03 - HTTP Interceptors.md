@@ -52,6 +52,10 @@ export const httpInterceptorProviders = [
 ];
 ```
 
+**Note**: attention to the `multi:true` option; this means that Angular must support multiple values for the 
+provide token  ``HTTP_INTERCEPTORS``. Without this, if we define another ``HTTP_INTERCEPTORS`` provider, the last
+one will overwrite the previously defined one, so that it would be impossible to have multiple interceptors.
+
 ![interceptor_stack.png](images%2Finterceptor_stack.png)
 
 The left arrows represent the request handling.
