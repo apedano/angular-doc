@@ -118,5 +118,51 @@ f.form.controls.email?.valid
 ```
 
 
+## Arrays
 
+### Declaration 
+
+```typescript
+public recipeIngredients!: RecipeIngredient[] ;
+```
+
+### Add to array
+
+```typescript
+var numbers = new Array(1, 4, 9); 
+var length = numbers.push(10); 
+console.log("new numbers is : " + numbers );  
+length = numbers.push(20); 
+console.log("new numbers is : " + numbers );
+```
+
+`
+new numbers is : 1,4,9,10
+new numbers is : 1,4,9,10,20
+`
+
+### Remove elements
+
+```typescript
+let array: number[] = [0, 1, 2, 3, 4, 5, 6];
+
+//Remove from the end
+let removedElement = array.pop();  //[0, 1, 2, 3, 4, 5]
+
+//Remove from the beginning
+removedElement = array.shift();  //[1, 2, 3, 4]
+
+//Remove from specified index
+let index = array.indexOf(1);
+let elementsToRemove = 2;
+let removedElementsArray = array.splice(index, elementsToRemove);  //[1, 2]
+
+//Remove from specified index
+let itemIndex = array.indexOf(3);
+let newArray = array.filter((e, i) => i !== itemIndex);  //[4, 5]
+
+//Delete the value at specified index without resizing the array
+delete array[1];   //[3, , 5]
+
+```
 

@@ -94,7 +94,7 @@ And the template is
 ```typescript
 openNewIngredientDialog() {
     let newIngredientDialogRef = 
-        this.dialog.open(NewIngredientDialogComponent);s
+        this.dialog.open(NewIngredientDialogComponent);
     // this.dialog.open(NewIngredientDialogComponent, {
     //   data: {
     //     name: 'panda',
