@@ -9,43 +9,58 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 ...
 
 @Component({
-  selector: 'app-new-ingredient-dialog',
-  standalone: true,
-  templateUrl: './new-ingredient-dialog.component.html',
-  styleUrl: './new-ingredient-dialog.component.css',
-  imports: [MatDialogModule, IngredientFormComponent]
+    selector: 'app-recipe-ingredient-dialog',
+    standalone: true,
+    imports: [MatDialogModule, RecipeIngredientComponent],
+    templateUrl: './recipe-ingredient-dialog.component.html',
+    styleUrl: './recipe-ingredient-dialog.component.css'
 })
-export class NewIngredientDialogComponent {
+export class RecipeIngredientDialogComponent {
 
-  constructor(private dialogRef: MatDialogRef<NewIngredientDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) data: any, private appStateService: AppStateService) {}
+    constructor(private dialogRef: MatDialogRef<RecipeIngredientDialogComponent>,
+                @Inject(MAT_DIALOG_DATA) public data: {recipeIngredient: RecipeIngredient}, private appStateService: AppStateService) {}
 
-  closeAndResult($event: Ingredient) {
-    this.appStateService.logIfDebug("Closing NewIngredientDialogComponent dialog with result:", $event);
-    this.dialogRef.close($event);
-  }
-
+    closeAndResult($event: RecipeIngredient) {
+        this.appStateService.logIfDebug("Closing RecipeIngredientComponent dialog with result:", $event);
+        this.dialogRef.close($event);
+    }
 }
+
 ```
 
 and the template
 
 ```angular2html
-<h2 mat-dialog-title>Inserisci nuovo ingrediente</h2>
-<mat-dialog-content><app-ingredient-form (newIngredient)="closeAndResult($event)" ></app-ingredient-form></mat-dialog-content>
-<!-- <mat-dialog-actions> -->
-  <!-- <button mat-button mat-dialog-close>Cancel</button> -->
-  <!-- The mat-dialog-close directive optionally accepts a value as a result for the dialog. -->
-  <!-- <button mat-button [mat-dialog-close]="true">Delete</button> -->
-<!-- </mat-dialog-actions> -->
+<h2 mat-dialog-title>Modifica ingrediente nella ricetta</h2>
+<mat-dialog-content>
+    <app-recipe-ingredient 
+            [recipeIngredient]="data.recipeIngredient" 
+            (value)="closeAndResult($event)" 
+    ></app-recipe-ingredient>
+</mat-dialog-content>
 ```
 
-We see that the dialog component content is a form component, which has an output which emits the submitted new ingredient:
+### Binding with the wrapped component
+
+The dialog component can bind to the wrapped component input and binding
+
+```
+[recipeIngredient]="data.recipeIngredient"  -> @Input() recipeIngredient: RecipeIngredient = new RecipeIngredient();
+(value)="closeAndResult($event) -> @Output() value: EventEmitter<RecipeIngredient> = new EventEmitter();
+```
+
+### Passing data to the dialog
+
+The dialog compoment has an injected `MAT_DIALOG_DATA` with an expected object format `data: {recipeIngredient: RecipeIngredient}`
+
+The component creating the component can pass the expected data to the dialog via the data object
 
 ```typescript
-@Output('newIngredient') ingredientEmitter: EventEmitter<Ingredient> = new EventEmitter();
+let recipeIngredientDialogRef = this.dialog.open(RecipeIngredientDialogComponent, {
+      width: '600px',
+      data: { 'recipeIngredient': recipeIngredient} //pass data to the dialog
+});
 ```
-This output is bounded to the internal method ``closeAndResult``
 
 ### Referencing the dialog internally and return a dialog result
 
@@ -63,54 +78,23 @@ closeAndResult($event: Ingredient) {
 ```
 
 
-### Passing data to the dialog
-
-```typescript
-let dialogRef = dialog.open(YourDialog, {
-data: { name: 'austin' },
-});
-```
-
-```typescript
-@Component({
-  selector: 'your-dialog',
-  template: 'passed in {{ data.name }}',
-})
-export class YourDialog {
-  constructor(@Inject(MAT_DIALOG_DATA) public data: {name: string}) { }
-}
-```
-And the template is 
-
-```angular2html
-<ng-template let-data>
-  Hello, {{data.name}}
-</ng-template>
-```
-
 ## Using the `NewIngredientDialogComponent`
 
-
 ```typescript
-openNewIngredientDialog() {
-    let newIngredientDialogRef = 
-        this.dialog.open(NewIngredientDialogComponent);
-    // this.dialog.open(NewIngredientDialogComponent, {
-    //   data: {
-    //     name: 'panda',
-    //   },
-    // });
+openEditDialog(recipeIngredient: RecipeIngredient) {
+    this.appStateService.logIfDebug('Edit dialog open with', recipeIngredient);
+
+    let recipeIngredientDialogRef = this.dialog.open(RecipeIngredientDialogComponent, {
+        width: '600px',
+        data: { 'recipeIngredient': recipeIngredient} //pass data to the dialog
+    });
+    //we can subscribe to one of the dialog events to get the result
+    recipeIngredientDialogRef.afterClosed().subscribe(result => {
+        this.appStateService.logIfDebug("Result from dialog", result);
+        this.recipeIngredientsOutput.emit(this.recipeIngredients);
+    });
 }
 ```
-
-Then we can subscibe to one of the dialog events to get the result
-
-```typescript
-newIngredientDialogRef.afterClosed().subscribe(result => {
-  console.log("Dialog rsult", result); // new ingredient | undefined
-});
-```
-
     
 }
 
