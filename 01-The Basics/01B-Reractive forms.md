@@ -20,11 +20,18 @@ import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angula
 
 
 ```angular2html
-<form (ngSubmit)="onSubmit()" [formGroup]="entityForm">
+<div *ngIf="loading">Loading...</div>
+<form (ngSubmit)="onSubmit()" [formGroup]="entityForm" *ngIf="!loading">
    <span class="p-float-label">
                         <input pInputText formControlName="name">
                         <label for="name">Name</label>
                     </span>
+  <small id="name-invalid" class="p-error block"
+         *ngIf="name?.touched && name?.errors?.['minlength']">Name
+    should be at least 3 chars long</small>
+  <small id="name-invalid" class="p-error block"
+         *ngIf="name?.touched && name?.errors?.['required']">Power unit
+    is mandatory</small>
   <p-dropdown formControlName="season" [options]="seasons" [showClear]="true"
               placeholder="Select a Season">
   </p-dropdown>
@@ -131,6 +138,12 @@ export abstract class FormComponent<T extends IdEntity> {
     protected abstract mapFormToEntity(): void;
   
     protected abstract getRedirectUrlAfterSave(): any[];
+
+    get season() { return this.entityForm.get('season') }
+    get name() { return this.entityForm.get('name') }
+    get team() { return this.entityForm.get('team') }
+    get imageName() { return this.entityForm.get('imageName') }
+    get powerUnit() { return this.entityForm.get('powerUnit') }
 }
 ```
 In the form implementing class
