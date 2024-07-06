@@ -109,4 +109,4 @@ Keep in mind of following details of OnPush change detection, will make your app
 
 2. Any event binding using `(foo)=”bar()”` or `@HostListener()` will trigger change detection automatically
 
-3. Async pipe will trigger change detection automatically, so try to use more async pipe, and avoid manully do the subscription in component, otherwise a `changeDetectorRef.detectChanges()` is required.
+3. Async pipe will trigger change detection automatically, so try to use more async pipe, and avoid manually do the subscription in component, otherwise a `changeDetectorRef.detectChanges()` is required.
